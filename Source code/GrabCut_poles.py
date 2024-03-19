@@ -27,4 +27,4 @@ def grabcut_segmentation(image_path):
     plt.show()
 
 # Replace 'your_image.jpg' with the path to the image you want to segment
-grabcut_segmentation('C:/Rupali Shinde/transformers.jpg')
+grabcut_segmentation('C:/Rupali Shinde/testPole.jpg')

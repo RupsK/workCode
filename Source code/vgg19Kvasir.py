@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Fri Mar 15 13:47:43 2024
+
+@author: h4tec
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Mar  6 08:58:09 2024
 
 @author: h4tec
@@ -10,14 +17,14 @@ Created on Wed Mar  6 08:58:09 2024
 
 # import the necessary packages
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications import VGG19
+from tensorflow.keras.applications import VGG19, MobileNetV2
 from tensorflow.keras.layers import AveragePooling2D
 from tensorflow.keras.layers import Dropout
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers.legacy import Adam
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.preprocessing.image import load_img
@@ -34,6 +41,7 @@ import time
 import tensorflow as tf
 import pandas as pd
 import seaborn as sns
+
 
 def allocate_gpu_memory(gpu_number=0):
     #print(device_lib.list_local_devices())
@@ -56,7 +64,7 @@ start_time = time.time()
 # construct the argument parser and parse the arguments
  #grab the list of images in our dataset directory, then initialize
 # the list of data (i.e., images) and class images
-pathname = "C:/Rupali Shinde/crack dataset"
+pathname = "C:/Users/h4tec/Desktop/새 폴더/train"
 print("[INFO] loading images...")
 imagePaths = list(paths.list_images(pathname))
 data = []
@@ -98,7 +106,7 @@ labels = to_categorical(labels)
 
 # partition the data into training and testing splits using 75% of
 # the data for training and the remaining 25% for testing
-(trainX, testX, trainY, testY) = train_test_split(data, labels,test_size=0.20, stratify=labels, random_state=42)
+(trainX, testX, trainY, testY) = train_test_split(data, labels,test_size=0.20, random_state=42)
 
 # construct the training image generator for data augmentation
 aug = ImageDataGenerator(rotation_range=20,
@@ -111,7 +119,7 @@ aug = ImageDataGenerator(rotation_range=20,
 
 # load the MobileNetV2 network, ensuring the head FC layer sets are
 # left off
-baseModel = VGG19(weights="imagenet", include_top=False,input_tensor=Input(shape=(224, 224, 3)))
+baseModel = MobileNetV2(weights="imagenet", include_top=False,input_tensor=Input(shape=(224, 224, 3)))
 
 # construct the head of the model that will be placed on top of the
 # the base model
@@ -120,7 +128,7 @@ headModel = AveragePooling2D(pool_size=(7, 7))(headModel)
 headModel = Flatten(name="flatten")(headModel)
 headModel = Dense(128, activation="relu")(headModel)
 headModel = Dropout(0.5)(headModel)
-headModel = Dense(2, activation="softmax")(headModel)
+headModel = Dense(3, activation="softmax")(headModel)
 
 # place the head FC model on top of the base model (this will become
 # the actual model we will train)
@@ -134,16 +142,16 @@ for layer in baseModel.layers:
 # compile our model
 print("[INFO] compiling model...")
 #opt = Adam(learning_rate=INIT_LR, decay=INIT_LR / EPOCHS)
-model.compile(loss="binary_crossentropy", optimizer="Adam",metrics=["accuracy"])
+model.compile(loss='categorical_crossentropy', optimizer='adam',metrics=["accuracy"])
 
 # train the head of the network
 print("[INFO] training head...")
 H = model.fit(
     aug.flow(trainX, trainY, batch_size=BS),
-	steps_per_epoch=len(trainX) // BS,
-	validation_data=(testX, testY),
-	validation_steps=len(testX) // BS,
-	epochs=EPOCHS)
+    steps_per_epoch=len(trainX) // BS,
+    validation_data=(testX, testY),
+    validation_steps=len(testX) // BS,
+    epochs=EPOCHS)
 
 # make predictions on the testing set
 print("[INFO] evaluating network...")
@@ -160,10 +168,10 @@ predIdxs = np.argmax(predIdxs, axis=1)
 print(classification_report(testY.argmax(axis=1), predIdxs ,target_names=lb.classes_))
 print(confusion_matrix(testY.argmax(axis=1), predIdxs))
 cm = confusion_matrix(testY.argmax(axis=1), predIdxs)
-cm_df = pd.DataFrame(cm, index = ['Positive','Negative'], 
-                     columns = ['Negative','Positive'])
+#cm_df = pd.DataFrame(cm, index = ['esophagitis','poly', 'ulcerative-colitis'], 
+ #                    columns = ['esophagitis','poly', 'ulcerative-colitis'])
  # Create a figure with a specified size
-plt.figure(figsize=(2,2))
+plt.figure(figsize=(3,3))
     
 # Display the confusion matrix as an image with a colormap
 plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
@@ -174,7 +182,7 @@ plt.colorbar()
 
 #Plotting the confusion matrix
 plt.figure(figsize=(5,4))
-sns.heatmap(cm_df, annot=True)
+#sns.heatmap(cm_df, annot=True)
 plt.title('Confusion Matrix')
 plt.ylabel('Actal Values')
 plt.xlabel('Predicted Values')
