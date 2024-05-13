@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 
 # Load your image
-image = cv2.imread('C:/Users/h4tec/Desktop/11.jpg', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('C:/Users/h4tec/Desktop/json_parsing/6.jpg', cv2.IMREAD_GRAYSCALE)
 
 #image = cv2.resize(image, (400,800))
 

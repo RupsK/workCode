@@ -25,32 +25,40 @@ import glob
 i = 0
 j = 0
 for img in glob.glob("C:/Users/h4tec/Downloads/train/images/*.jpg"):
-    
+   
     image= Image.open(img)
     s = os.path.basename(img)
     name =s.replace('.jpg', '')
+    
     image_width, image_height = image.size
+    
     text_file_path = "C:/Users/h4tec/Downloads/train/labels/" + name + ".txt" # Replace with the path to your text file
     
-    image_width, image_height = image.size
-    
+  
+   
     
     with open(text_file_path, 'r') as file:
-        lines = file.readlines()
-    # Loop over each line in the text file
-    
-    for i, line in enumerate(lines):
-        _, x_center, y_center, width, height = map(float, line.strip().split())
-        yolo_coords = (x_center, y_center, width, height)
-        pixel_coords = yolo_to_pixels(yolo_coords, image_width, image_height)
-    
-        # Crop the image using the calculated pixel coordinates
-        cropped_image = image.crop(pixel_coords)
-    
+        check_file = os.stat(text_file_path).st_size
+        
+        if(check_file == 0):
+            print("The file is empty.")
+        else:
+            print("The file is not empty.")
+        
+            _, x_center, y_center, width, height = map(float, file.readline().strip().split())
+            
+          
+    yolo_coords = (x_center, y_center, width, height)
+    pixel_coords = yolo_to_pixels(yolo_coords, image_width, image_height)
+
+   # Crop the image using the calculated pixel coordinates
+    cropped_image = image.crop(pixel_coords)
+   
         # Save or show the cropped image
-        cropped_image_path = 'C:/Users/h4tec/Downloads/train/images/'+'image' +str(i)+str(j)+'.jpg' # Replace with the path where you want to save the cropped image
-        cropped_image.save(cropped_image_path)
-        j = j + 1
+    cropped_image_path = 'C:/Users/h4tec/Downloads/cropedFinal 4/'+ 'crop' +str(i)+'.jpg' # Replace with the path where you want to save the cropped image
+
+    cropped_image.save(cropped_image_path)
+    
     i = i + 1  # Save each crop with a unique file name
       
         

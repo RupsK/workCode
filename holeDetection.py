@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 
 # Read the image
-image = cv2.imread('C:/Rupali Shinde/JejuSet-3/0 (2).jpg')
+image = cv2.imread('C:/Users/h4tec/Desktop/json_parsing/6.jpg')
 
 # Convert the image to grayscale
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -28,17 +28,22 @@ hole_count = 0
 
 # Loop over the contours
 for contour in contours:
-    # Approximate the contour to a polygon
-    approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
-    # If the contour has fewer than 15 points, it's likely a hole
-    if len(approx) < 15:
-        hole_count += 1
+    for i in contours:
+        area = cv2.contourArea(i)
+        if  area < 100 :
+            # Approximate the contour to a polygon
+            approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
+            # If the contour has fewer than 15 points, it's likely a hole
+            if len(approx) < 15:
+                hole_count += 1
 
 # Display the total number of holes
 print("Number of holes:", hole_count)
 
 # Display the original image with contours
 cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
+output_path = 'output_image.jpg'
+cv2.imwrite(output_path, image)
 cv2.imshow('Contours', image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
